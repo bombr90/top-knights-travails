@@ -1,0 +1,58 @@
+/* style.css */
+
+* {
+  /* margin: 0px; */
+  /* padding: 0px; */
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  box-sizing: border-box;
+  /* border: 1px solid black; */
+}
+
+#container {
+  display:flex;
+  justify-content: center;
+}
+
+#knight {
+  flex:1;
+  width:auto;
+  height: 90px;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(8, 100px);
+  grid-template-rows: repeate(8,100px);
+  box-shadow: 4px 4px 8px gray;
+  background-color: black;
+
+}
+#board:nth-child(even){
+  background-color: gray;
+}
+
+#board:nth-child(odd){
+  background-color:whitesmoke;
+}
+
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  width: 100px;
+  background: whitesmoke;
+  border: 1px dashed black;
+}
+
+.square:nth-child(16n+1),
+.square:nth-child(16n+3),
+.square:nth-child(16n+5),
+.square:nth-child(16n+7),
+.square:nth-child(16n+10),
+.square:nth-child(16n+12),
+.square:nth-child(16n+14),
+.square:nth-child(16n+16)
+{
+  background-color: lightgray;
+}
