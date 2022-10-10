@@ -10,5 +10,29 @@
 </head>
 <body>
   <div id="container"></div>
+  <div id="gui">
+    <fieldset>
+      <legend>Start Coordinates (x,y)</legend>
+      <label for="xInit">x:</label>
+      <input type="number" class="coordinate" id="xInit" name='xInit' placeholder="0" min="0" max="7">
+      <label for="yInit">y:</label>
+      <input type="number" class="coordinate" id="yInit" name='yInit' placeholder="0" min="0" max="7">
+    </fieldset>
+    <fieldset>
+      <legend>End Coordinates (x,y)</legend>
+      <label for="xDest">x:</label>
+      <input type="number" class="coordinate" id="xDest" name='xDest' placeholder="0" min="0" max="7">
+      <label for="yDest">y:</label>
+      <input type="number" class="coordinate" id="yDest" name='yDest' placeholder="0" min="0" max="7">
+    </fieldset>
+    <button type="button" id="submit">Submit</button>
+    <button type="button" id="reset">Reset</button>
+  </div>
+  <div id="output">
+    <fieldset>
+      <legend>Path Array:</legend>
+      <div id="guiDisplay">Enter Start and End coordinates then click Submit</div>
+    </fieldset>
+  </div>
 </body>
 </html>

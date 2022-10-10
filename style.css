@@ -11,6 +11,7 @@
 #container {
   display:flex;
   justify-content: center;
+  margin-bottom: 16px;;
 }
 
 #knight {
@@ -55,4 +56,28 @@
 .square:nth-child(16n+16)
 {
   background-color: lightgray;
+}
+
+#gui {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  justify-content: center;
+  gap: 16px
+}
+
+fieldset {
+  display:flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+#output {
+  display: grid;
+}
+
+#guiDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  white-space: pre;
 }

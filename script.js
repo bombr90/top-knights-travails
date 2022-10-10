@@ -1,4 +1,50 @@
+// DOM elements
 const container = document.getElementById('container');
+const submit = document.getElementById('submit');
+const reset = document.getElementById('reset');
+const guiDisplay = document.getElementById('guiDisplay');
+const inputFields = document.querySelectorAll('.coordinate');
+// Attach Event Listeners
+submit.addEventListener('click', showPath);
+reset.addEventListener('click', resetBoard);
+
+function showPath() {
+  const xStart = +inputFields[0].value;
+  const yStart = +inputFields[1].value;
+  const xEnd = +inputFields[2].value;
+  const yEnd = +inputFields[3].value;
+  if( xStart >= 0 && xStart <= 7 &&
+      yStart >= 0 && yStart <= 7 &&
+      xEnd >= 0 && xEnd <= 7 &&
+      yEnd >= 0 && yEnd <= 7) {
+        board.reset();
+        const path = board.knightMoves([xStart,yStart], [xEnd,yEnd]);
+        console.log(`The path from (${xStart},${yStart}) to (${xEnd},${yEnd}) was completed in ${path.length -1} moves`);
+        guiDisplay.textContent = `The path from (${xStart},${yStart}) to (${xEnd},${yEnd}) was completed in ${path.length-1} moves: \r\n`;
+        let moveCount = 0;
+        path.forEach(coordinate => {
+          board.renderNumber(moveCount, coordinate.split(','));
+          let text = document.createTextNode(`(${coordinate}), `);
+          guiDisplay.appendChild(text);
+          moveCount++;  
+        });
+        board.renderKnight([xStart, yStart]);
+        console.table(path);
+        return;
+      }
+      guiDisplay.textContent = "input values outside 0-7, try again";
+      console.log('input values outside 0-7')
+      return;
+}
+
+function resetBoard() {
+  inputFields.forEach(input => {
+    input.value = '';
+  })
+  guiDisplay.textContent = 'Enter Start and End coordinates then click Submit';
+  board.reset();
+}
+
 const board = (() => {
   const knight = document.createElement('img');
   knight.src = './knight.svg'
@@ -7,8 +53,7 @@ const board = (() => {
   const prevMoves = [];
   const visited = Array(8).fill().map(()=>Array(8).fill(false));
 
-  console.log('prevmoves',prevMoves)
-
+  // GUI functions
   const initBoard = (() => {
     let board = document.createElement('div');
     board.id = 'board';
@@ -25,10 +70,35 @@ const board = (() => {
     container.appendChild(board);
   })();
 
+  const reset = () => {
+    const squares = document.querySelectorAll('.square')
+    squares.forEach(square => {
+      let x = square.dataset.x;
+      let y = square.dataset.y; 
+      square.textContent = `x:${x}, y:${y}`;
+    })
+  }
+
   const renderKnight = ([x,y]) => {
     const targetSquare = document.querySelector(`.square[data-x='${x}'][data-y='${y}']`);
-    targetSquare.replaceChildren(knight)
+    if(!targetSquare) {
+      console.log('renderknight fail');
+      return
+    }
+    targetSquare.replaceChildren(knight);
   }
+
+  const renderNumber = (num, [x,y]) => {
+    const targetSquare = document.querySelector(
+      `.square[data-x='${x}'][data-y='${y}']`
+    );
+    if (!targetSquare) {
+      console.log("renderNumber fail");
+      console.log(typeof x, x, typeof y, y);
+      return;
+    }
+    targetSquare.textContent=`${num}`;
+  };
 
   function renderBullet([x,y] = []) {
   const targetSquare = document.querySelector(`.square[data-x='${x}'][data-y='${y}']`);
@@ -38,13 +108,10 @@ const board = (() => {
   };
   targetSquare.innerHTML='&#8226';
 }
-
-  const nextMove = ([x, y] = []) => {
+// Utility functions
+  const nextMove = ([x,y]) => {
     const potentialMoves = [];
-    const currLoc = [
-      x || knight.parentNode.dataset.x,
-      y || knight.parentNode.dataset.y,
-    ]
+    const currLoc = [x,y];
     nextMoveOffsets.forEach((offset) => {
       const newX = currLoc[0] + offset[0];
       const newY = currLoc[1] + offset[1];
@@ -58,51 +125,62 @@ const board = (() => {
           newX, 
           newY,
         ]);
+        prevMoves.push([[newX,newY],currLoc]);
       }
     });
-    // potentialMoves.forEach(renderBullet);
     return potentialMoves;
   };
 
-  const knightMoves = ([xInit,yInit], [xDest,yDest]) => {
+  const createCol = (arr, n) => arr.map(x => x[n].join());
+  
+  // main knights travails algorithm
+  const knightMoves = ([xInit,yInit],[xDest,yDest]) => {
     const queue = [[xInit,yInit]]
     visited[xInit][yInit] = true;
-    while(queue.length<10) {
+    while(queue.length) {
+      if(queue.length>=64){
+        console.log('queue overflow (>64 squares)...exiting')
+        console.table('queue',queue)
+        break;
+      };
       const currPos = queue.shift();
       if(currPos.join()===[xDest,yDest].join()) {
         console.log('success')
         break
       }
       queue.push(...nextMove(currPos));
-      prevMoves.push(currPos);
-      console.table('queue1,prevMoves',queue, prevMoves)
     }
     
-    const currPos = [xDest,yDest];
+    // backtrace once solution found
     const path = [];
+    const currMoveCol = createCol(prevMoves, 0);
+    const prevMoveCol = createCol(prevMoves, 1);
+    path.unshift([xDest,yDest].join());
+    let loopcount = 0; // to avoid infinite loop
+    let currPos = [xDest, yDest].join();
 
-    // while(currPos.join() !== [xInit,yInit].join()) {
-    //   path.unshift(currPos)
-    //   currPos 
-    // }
-    // path.unshift([xInit,yInit])
-
-    console.table('prevMoves moveCount:',prevMoves);
-    return path
+  while (currPos !== [xInit, yInit].join()) {  
+    let prevMoveIndex = currMoveCol.indexOf(currPos);
+    currPos=(prevMoveCol[prevMoveIndex]);
+    path.unshift(currPos);
+    loopcount++;
+    if (loopcount >= 64) {
+      console.log('path exceeded 64 squares...exiting...')
+      break;
+    }
+  }
+  console.log('Knights Path:');
+  console.table(path);
+  return path
   }
 
   return {
     renderKnight,
+    renderNumber,
     nextMove,
     knightMoves,
-    renderBullet,
+    reset,
+    // renderBullet,
   }
 })()
-
-// drivercode
-board.renderKnight([4, 3]);
-// board.nextMove([4,3]);
-board.knightMoves([4,3],[3,5]);
-
-
 
